@@ -39,6 +39,12 @@ Only items that reproduce go into feedback/. Everything else stays here.
 - Dust positions: 62 real positions sit below the current minQuantity (min was raised after they opened). NOT stuck — reducing orders are EXEMPT from minQuantity, so owners can close them (simulated each owner's close from=owner: ALLOWED). So min only bites OPENING orders. (scripts/scan-dust.ts, scripts/probe-dust-close.ts)
 - Funding rounding: cumulative funding index carries ~37 significant digits (per-interval deltas ~1e37); funding owed = size*(cumNow-entryCum)/scale has dust-level granularity, no truncation-to-zero for real positions. Earlier check: hourly cumulative delta == index*rate/8 exactly. (scripts/probe-funding-rounding.ts)
 
+## Linked-wallet / isolated-margin rail (investigated; blocked on funds)
+- Rail is LIVE but undocumented and unused: MarginBank.getLinkedWalletRegistry() = 0x5b3C5Bf1F7AdA852e8AA783f6299932E32073aFb, maxChildren=12, proposeLink simulates ALLOWED. App says isolated margin is "coming soon"; 0 link events on-chain. (scripts/probe-linked-wallet.ts, probe-link-params.ts)
+- Consent/validation logic SOUND (all eth_call): proposeLink(self)->CannotLinkSelf, acceptLink w/o proposal->NoProposalPending, unlink not-linked->NotLinked, recall/repay w/o principal->NoFundedPrincipal. (scripts/probe-link-logic.ts)
+- BLOCKER: main-funding money flow (auto-pull to fund a child, recallFromChild, repayFunding) needs real withdrawable USDso. Our app wallet holds only the 1000 voucher, whose getPerpWalletPullCapacity = 0 — vouchers can't fund a child. Can't test the misrouting paths without a funded (non-voucher) account. (scripts/probe-pull-capacity.ts)
+- UNPROVEN lead (needs funds): LiquidationEngine.getLinkedWalletRegistry() = 0x0 (engine NOT link-aware) while the bank's IS set. Whether liquidating a main-funded child claws back principal correctly is untested — can't force a funded, underwater child without real USDso. Not filed (not reproducible yet).
+
 ## Open leads
 - [ ] 65 NoFill market stops would fill at the parent block (likely liquidity consumed earlier in the block). Unproven, not filed.
 - [ ] Stop orders (TP/SL): needs the app wallet to approve the stop registry once (set any TP/SL in the app). Then test: bot-key creation for owner (expect InvalidOrderOwner), 0.15 STT refund on cancel, linked-pair cancel/refund, getUnclaimedPerpStopSomi.
