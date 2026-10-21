@@ -39,4 +39,12 @@ The repro scripts live in [scripts/](scripts/) (and [scripts/repro/](scripts/rep
 
 ## Security
 
-No exploitable vulnerability was found. Access control is enforced (unauthorized `placeOrderFor`/`cancelOrderFor`/`reduceOrderFor` revert `OnlyApprovedContracts`; withdrawals are self-scoped), the indexer exposes no mutations, and no account is below maintenance margin or carrying bad debt. Had anything exploitable turned up, it would have gone privately to security@dreamdex.io, not here.
+No exploitable vulnerability was found. In particular:
+
+- **Access control** is enforced — unauthorized `placeOrderFor`/`cancelOrderFor`/`reduceOrderFor` revert `OnlyApprovedContracts`, and withdrawals are self-scoped (no `withdrawFor`).
+- **Mark-price manipulation** does not apply — the perp mark is index-anchored (tracks the index oracle within ±0.09% across all markets, vs up to 0.17% drift from the book midpoint), so trading can't move it to sweep others' stops or liquidations.
+- **Fee farming** does not apply — all perp fees are zero (taker, maker, insurance-fund share), so there is no maker rebate to farm.
+- **Funding rounding** is dust-level (the cumulative funding index carries ~37 significant digits) with no truncation-to-zero for real positions.
+- The indexer exposes **no write mutations**, and no account is below maintenance margin or carrying bad debt.
+
+Had anything exploitable turned up, it would have gone privately to security@dreamdex.io, not here.
