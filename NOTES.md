@@ -34,6 +34,9 @@ Only items that reproduce go into feedback/. Everything else stays here.
 - Access control (own accounts only): a stranger's placeOrderFor/cancelOrderFor/reduceOrderFor against our wallet all revert OnlyApprovedContracts; withdraw() is self-scoped (no withdrawFor); linked bot allowed as expected. No auth bypass found.
 - Mark-price manipulation: the perp mark is INDEX-anchored (getMarkPrice tracks getIndexPrice within ±0.09% across all 21 markets; mark-vs-bookMid drifts up to 0.17%). Pushing the book does not move the mark, so wash-trading to trigger others' stops/liquidations does not apply. Defense holds. (scripts/probe-mark-source.ts)
 - Fee farming: all perp fees are zero — taker, maker, and insurance-fund share — on all 21 markets (scripts/probe-fees.ts). No maker rebate to farm with a self-cross.
+- OI symmetry: sum(long sizes) == sum(short sizes) == getOpenInterest() in all 21 markets, delta 0. Position accounting sound. (scripts/scan-oi-symmetry.ts)
+- Solvency: VoucherDistributor holds 413.008M real USDso == its budgetRemaining, so paper vouchers are fully token-backed (real tokens move to the bank on claim). MarginBank holds 296M USDso. No fractional reserve. Insurance fund = 0 (documented: no testnet backstop bidders). (scripts/probe-solvency.ts)
+- Dust positions: 62 real positions sit below the current minQuantity (min was raised after they opened). NOT stuck — reducing orders are EXEMPT from minQuantity, so owners can close them (simulated each owner's close from=owner: ALLOWED). So min only bites OPENING orders. (scripts/scan-dust.ts, scripts/probe-dust-close.ts)
 - Funding rounding: cumulative funding index carries ~37 significant digits (per-interval deltas ~1e37); funding owed = size*(cumNow-entryCum)/scale has dust-level granularity, no truncation-to-zero for real positions. Earlier check: hourly cumulative delta == index*rate/8 exactly. (scripts/probe-funding-rounding.ts)
 
 ## Open leads
