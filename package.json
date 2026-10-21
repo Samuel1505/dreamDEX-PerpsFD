@@ -1,0 +1,19 @@
+{
+  "name": "dreamdex-perps-feedback",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "tsx scripts/smoke.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@somnia-chain/markets-sdk": "^0.32.1",
+    "dotenv": "^18.0.8",
+    "viem": "^2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
